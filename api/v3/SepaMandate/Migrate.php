@@ -1,3 +1,4 @@
+<?php 
 function civicrm_api3_sepa_mandate_migrate($params) {
 $params = array(
   'sequential' => 1,

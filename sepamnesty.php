@@ -1,6 +1,6 @@
 <?php
 
-require_once 'sepa.civix.php';
+require_once 'sepamnesty.civix.php';
 
 /**
  * Implementation of hook_civicrm_config
@@ -8,7 +8,7 @@ require_once 'sepa.civix.php';
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
  */
 function sepamnesty_civicrm_config(&$config) {
-  _sepa_civix_civicrm_config($config);
+  sepamnesty_civix_civicrm_config($config);
 }
 
 /**
@@ -19,7 +19,7 @@ function sepamnesty_civicrm_config(&$config) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
 function sepamnesty_civicrm_xmlMenu(&$files) {
-  _sepa_civix_civicrm_xmlMenu($files);
+  sepamnesty_civix_civicrm_xmlMenu($files);
 }
 
 /**
@@ -28,7 +28,7 @@ function sepamnesty_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function sepamnesty_civicrm_install() {
-  return _sepa_civix_civicrm_install();
+  return sepamnesty_civix_civicrm_install();
 }
 
 /**
@@ -37,7 +37,7 @@ function sepamnesty_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function sepamnesty_civicrm_uninstall() {
-  return _sepa_civix_civicrm_uninstall();
+  return sepamnesty_civix_civicrm_uninstall();
 }
 
 /**
@@ -46,7 +46,7 @@ function sepamnesty_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function sepamnesty_civicrm_enable() {
-  return _sepa_civix_civicrm_enable();
+  return sepamnesty_civix_civicrm_enable();
 }
 
 /**
@@ -55,7 +55,7 @@ function sepamnesty_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
 function sepamnesty_civicrm_disable() {
-  return _sepa_civix_civicrm_disable();
+  return sepamnesty_civix_civicrm_disable();
 }
 
 /**
@@ -70,7 +70,7 @@ function sepamnesty_civicrm_disable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function sepamnesty_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _sepa_civix_civicrm_upgrade($op, $queue);
+  return sepamnesty_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -82,7 +82,7 @@ function sepamnesty_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function sepamnesty_civicrm_managed(&$entities) {
-  return _sepa_civix_civicrm_managed($entities);
+  return sepamnesty_civix_civicrm_managed($entities);
 }
 
 /**
@@ -95,7 +95,7 @@ function sepamnesty_civicrm_managed(&$entities) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
  */
 function sepamnesty_civicrm_caseTypes(&$caseTypes) {
-  _sepa_civix_civicrm_caseTypes($caseTypes);
+  sepamnesty_civix_civicrm_caseTypes($caseTypes);
 }
 
 /**
@@ -104,5 +104,5 @@ function sepamnesty_civicrm_caseTypes(&$caseTypes) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
  */
 function sepamnesty_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _sepa_civix_civicrm_alterSettingsFolders($metaDataFolders);
+  sepamnesty_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
