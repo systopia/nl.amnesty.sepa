@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="nl.amnesty.sepa" type="module">
-  <file>sepa</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+  <file>sepamnesty</file>
+  <name>Sepamnesty</name>
+  <description>Migrate pledges to recurring contribs</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Xavier Dutoit</author>
@@ -14,8 +14,8 @@
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>Probably of no use for you</comments>
   <civix>
-    <namespace>CRM/Sepa</namespace>
+    <namespace>CRM/Sepamesty</namespace>
   </civix>
 </extension>
