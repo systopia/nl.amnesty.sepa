@@ -6,42 +6,56 @@ function civicrm_api3_sepa_mandate_migrate($params) {
 	  $params["option.limit"] = 1;
 	}
 	if (!array_key_exists ('debug',$params)) {
-	  echo "no debug mode\n";
-	  $params["debug"] = 0;
+	  echo "no debug mode. Set debug=0 if you don't want debug msg\n";
+	  $params["debug"] = 1;
 	}
-	$params['pledge_status'] = '"In Progress"';
-	$params['is_test'] = 0;
+	$params['pledge_status_id'] = 5;
+	$params['pledge_is_test'] = 0;
 
-	$result = civicrm_api3('Pledge', 'get', $params);
+	$result = civicrm_api3('Pledge', 'getbasic', $params);
 
 	foreach ($result["values"] as $pledge) {
 	  if ($params["debug"]) print_r($pledge);
+          if ($params["debug"]) {
+	    $tmp = civicrm_api3('ContributionRecur', 'get', array("contact_id"  => $pledge["contact_id"] ));
+            if ($tmp["count"] > 0) {
+              echo "\n skipping pledge ".  $pledge["id"]. " for contact ".$pledge["contact_id"];
+              continue;
+            }
+          }
+          if (!$pledge["original_installment_amount"]) {
+            print_r($pledge);
+            die("error in a pledge");
+          }
 	  $cr = civicrm_api3 ("ContributionRecur","create", array(
 	    "contact_id" => $pledge["contact_id"],
-	    "amount" => $pledge["pledge_amount"],
-	    "currency" => $pledge["pledge_currency"],
-	    "frequency_interval" => $pledge["pledge_frequency_interval"],
-	    "frequency_unit" => $pledge["pledge_frequency_unit"],
-	    "start_date" => $pledge["pledge_create_date"],
-	    "create_date" => $pledge["pledge_create_date"],
-	    "next_sched_contribution_date" => $pledge["pledge_next_pay_date"],
-	    "financial_type_id" => $pledge["pledge_financial_type"],
+	    "amount" => $pledge["original_installment_amount"],
+	    "currency" => $pledge["currency"],
+            "contribution_status_id" => $pledge["status_id"],
+	    "frequency_interval" => $pledge["frequency_interval"],
+	    "frequency_unit" => $pledge["frequency_unit"],
+	    "frequency_day" => $pledge["frequency_day"],
+	    "start_date" => $pledge["start_date"],
+	    "create_date" => $pledge["create_date"],
+	    "financial_type_id" => $pledge["financial_type_id"],
 	    "payment_instrument_id" => (int) CRM_Core_OptionGroup::getValue('payment_instrument', 'RCUR', 'name'),
 	    "status" => 'RCUR',
-	    "campaign_id" => $pledge["pledge_campaign_id"]
+	    "campaign_id" => $pledge["campaign_id"]
 	  ));
 	  $crid = $cr["id"];
-	  $r = civicrm_api3 ("CustomValue","get", array("entity_id"=>$pledge["contact_id"]));
+	  $r = civicrm_api3 ("CustomValue","get", array("entity_id"=>$pledge["id"],"entity_table"=>"civicrm_pledge"));
 	  $mandate = array ("contact_id" => $pledge["contact_id"], "entity_table" => "civicrm_contribution_recur", "entity_id" => $crid,
 	     "source"=> "pledge:". $pledge["id"], "creditor_id" => 1,
-	    "type"=>"RCUR", "status" => "RCUR", "creation_date" => $pledge["pledge_create_date"], "validation_date" => $pledge["pledge_create_date"]
+	    "type"=>"RCUR", "status" => "RCUR", "creation_date" => $pledge["create_date"], "validation_date" => $pledge["start_date"]
 	  );
 	  foreach ($r["values"] as $cf) {
-	     if ($cf[id] == 1 ) 
+	     if ($cf[id] == 5 ) 
 	       $mandate["iban"] = $cf["latest"];
-	     if ($cf[id] == 2 ) 
+	     if ($cf[id] == 6 ) 
 	       $mandate["bic"] = $cf["latest"];
-	     if ($cf[id] == 4 ) 
+	     if ($cf[id] == 3 ) 
+	       $mandate["reference"] = $cf["latest"];
+	     if ($cf[id] == 7 ) 
 	       $mandate["bank"] = $cf["latest"];
 	  }
 	  $r = civicrm_api3 ("SepaMandate","create", $mandate);
@@ -58,7 +72,7 @@ function civicrm_api3_sepa_mandate_migrate($params) {
 	   
 	  if (!$r["is_error"]) {
 	    echo "\nok pledge ".$pledge["id"]. " for ".  $pledge["display_name"].":". $pledge["contact_id"]. "-> contrib recur ". $crid;
-	    $r=civicrm_api3("Pledge","create",array ("id"=>$pledge["id"],"is_test" => 1));
+	    $r=civicrm_api3("Pledge","createbasic",array ("id"=>$pledge["id"],"is_test" => 1));
 	  }
 	  
 	}
