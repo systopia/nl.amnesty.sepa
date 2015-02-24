@@ -17,9 +17,9 @@ function civicrm_api3_sepa_mandate_migrate($params) {
 	foreach ($result["values"] as $pledge) {
 	  if ($params["debug"]) print_r($pledge);
           if ($params["debug"]) {
-	    $tmp = civicrm_api3('ContributionRecur', 'get', array("contact_id"  => $pledge["contact_id"] ));
+	    $tmp = civicrm_api3('ContributionRecur', 'get', array("contact_id"  => $pledge["contact_id"], "sequential"=>1 ));
             if ($tmp["count"] > 0) {
-              echo "\n skipping pledge ".  $pledge["id"]. " for contact ".$pledge["contact_id"];
+              echo "\n skipping pledge ".  $pledge["id"]. " for contact ".$pledge["contact_id"] ." " .$tmp["count"]. " recurring contrib=".$tmp["values"][0]["id"];
               continue;
             }
           }
