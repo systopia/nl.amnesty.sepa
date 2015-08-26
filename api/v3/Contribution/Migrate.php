@@ -66,11 +66,6 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
       continue;//this contribution is part of a pledge that has already been migrated in this batch
     $migrated[] = $c->pledge_id;
 
-    if (CRM_Sepa_Logic_Verification::verifyIBAN($c->iban) == FALSE) {
-      _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, $c->iban);
-      $c->iban = "";
-    }
-
     $cr = civicrm_api3("ContributionRecur", "create", array(
         "contact_id" => $c->contact_id,
         "amount" => $c->amount,
@@ -90,6 +85,16 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
         "sequential" => 0
     ));
     print_debug($cr);
+
+    if (CRM_Sepa_Logic_Verification::verifyIBAN($c->iban) == FALSE) {
+      _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, $c->iban);
+      $c->iban = "";
+      $reference = "INVIBAN ".$c->mandate.":".$cr["id"];
+    } else {
+      $reference = $c->mandate;
+    }
+
+
     $mandate = array("contact_id" => $c->contact_id,
         "entity_table" => "civicrm_contribution_recur",
         "entity_id" => $cr["id"],
@@ -98,7 +103,7 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
         "validation_date" => $c->start_date,
         "iban" => $c->iban,
         "bic" => $c->bic,
-        "reference" => $c->mandate,
+        "reference" => $reference,
         "bank" => $c->bank,
         "sequential" => 0
     );
@@ -114,10 +119,14 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
           "type" => "RCUR", "status" => "RCUR", "creation_date" => $c->create_date, "validation_date" => $c->start_date,
           "iban" => $c->iban,
           "bic" => $c->bic,
-          "reference" => "DUP " . $c->mandate . ":" . $cr["id"],
           "bank" => $c->bank,
           "sequential" => 0
       );
+      if (empty($c->iban)) {
+        $mandate['reference'] = "DUP ".$reference;
+      } else {
+        $mandate['reference'] = "DUP ".$reference.":".$cr["id"];
+      }
       $r = civicrm_api3("SepaMandate", "create", $mandate);
     }
     print_debug($r);
