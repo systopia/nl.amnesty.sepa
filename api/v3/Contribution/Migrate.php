@@ -13,9 +13,6 @@ $debugMode=1;
 function civicrm_api3_contribution_migrate($params)
 {
 
-  //temp
-  CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS sepa_migrate_errors');
-
   $errorFile = "CREATE TABLE IF NOT EXISTS `sepa_migrate_errors` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `migration_date` DATE DEFAULT NULL,
