@@ -13,6 +13,9 @@ $debugMode=1;
 function civicrm_api3_contribution_migrate($params)
 {
 
+  //temp
+  CRM_Core_DAO::executeQuery('DROP TABLE IF EXISTS sepa_migrate_errors');
+
   $errorFile = "CREATE TABLE IF NOT EXISTS `sepa_migrate_errors` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `migration_date` DATE DEFAULT NULL,
@@ -21,7 +24,7 @@ function civicrm_api3_contribution_migrate($params)
   `pledge_id` INT(11) DEFAULT NULL,
   `recur_id` INT(11) DEFAULT NULL,
   `campaign_id` INT(11) DEFAULT NULL,
-  `iban` VARCHAR(45) DEFAULT NULL,
+  `details` VARCHAR(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -86,14 +89,23 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
     ));
     print_debug($cr);
 
-    if (!CRM_Sepa_Logic_Verification::verifyIBAN($c->iban)) {
-      _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, $c->iban);
+    $verifyIBAN = CRM_Sepa_Logic_Verification::verifyIBAN($c->iban);
+    if ($verifyIBAN) {
+      _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, "IBAN :".$c->iban);
       $c->iban = "";
       $reference = "INVIBAN ".$c->mandate.":".$cr["id"];
     } else {
       $reference = $c->mandate;
     }
 
+    $verifyBIC = CRM_Sepa_Logic_Verification::verifyBIC($c->bic);
+    if ($verifyBIC) {
+      _logErrorRecord('BIC is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, "BIC :".$c->bic);
+      $c->bic = "";
+      $reference = "INVBIC ".$c->mandate.":".$cr["id"];
+    } else {
+      $reference = $c->mandate;
+    }
 
     $mandate = array("contact_id" => $c->contact_id,
         "entity_table" => "civicrm_contribution_recur",
@@ -138,7 +150,7 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
 
   }
 }
-function _logErrorRecord($message, $contactId = null, $pledgeId = null, $recurId = null, $campaignId = null, $iban = null) {
+function _logErrorRecord($message, $contactId = null, $pledgeId = null, $recurId = null, $campaignId = null, $details = null) {
   $whereClauses = array();
   $whereClauses[] = 'error_message = %1';
   $params[1] = array($message, 'String');
@@ -170,10 +182,10 @@ function _logErrorRecord($message, $contactId = null, $pledgeId = null, $recurId
     $params[$count] = array($campaignId, 'Integer');
   }
 
-  if (!empty($iban)) {
+  if (!empty($details)) {
     $count++;
-    $whereClauses[] = 'iban = %'.$count;
-    $params[$count] = array($iban, 'String');
+    $whereClauses[] = 'details = %'.$count;
+    $params[$count] = array($details, 'String');
   }
   $query = "INSERT INTO sepa_migrate_errors SET ".implode(', ', $whereClauses);
 
