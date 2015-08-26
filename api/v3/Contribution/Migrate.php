@@ -86,7 +86,7 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
     ));
     print_debug($cr);
 
-    if (CRM_Sepa_Logic_Verification::verifyIBAN($c->iban) == FALSE) {
+    if (!CRM_Sepa_Logic_Verification::verifyIBAN($c->iban)) {
       _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, $c->iban);
       $c->iban = "";
       $reference = "INVIBAN ".$c->mandate.":".$cr["id"];
@@ -107,6 +107,8 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
         "bank" => $c->bank,
         "sequential" => 0
     );
+
+    print_debug($mandate);
     try {
       $r = civicrm_api3("SepaMandate", "create", $mandate);
     } catch (Exception $e) {
