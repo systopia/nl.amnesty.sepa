@@ -1,45 +1,16 @@
 <?php
+function civicrm_api3_contribution_migrate($params) {
 
-global $debugMode;
-$debugMode=1;
-
-  function print_debug ($obj) {
-    global $debugMode;
-    if ($debugMode) {
-      print_r($obj);
-    }
-}
-
-function civicrm_api3_contribution_migrate($params)
-{
-
-  $errorFile = "CREATE TABLE IF NOT EXISTS `sepa_migrate_errors` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `migration_date` DATE DEFAULT NULL,
-  `error_message` TEXT,
-  `contact_id` INT(11) DEFAULT NULL,
-  `pledge_id` INT(11) DEFAULT NULL,
-  `recur_id` INT(11) DEFAULT NULL,
-  `campaign_id` INT(11) DEFAULT NULL,
-  `details` VARCHAR(45) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-";
-  CRM_Core_DAO::executeQuery($errorFile);
-
-  global $debugMode;
+  $logger = new CRM_MigrateLogger();
   $migrated = array();
 
   if (!array_key_exists('option.limit', $params)) {
-    echo "option.limit defaults to 1\n";
+    $logger->logMessage('Warning', 'option.limit defaults to 1');
     $params["option.limit"] = 1;
+  } else {
+    $logger->logMessage('Warning', 'option.limit set to '.$params['option.limit']);
   }
-  if (!array_key_exists('debug', $params)) {
-    echo "no debug mode. Set debug=0 if you don't want debug msg\n";
-    $params["debug"] = 1;
-  }
-  $debugMode = $params["debug"];
+
 
   $c = CRM_Core_DAO::executeQuery("SELECT c.contact_id, c.id, c.total_amount AS amount,
 c.campaign_id, p.id AS pledge_id, p.status_id,p.frequency_unit, p.frequency_interval, p.frequency_day,p.start_date,
@@ -53,17 +24,19 @@ WHERE c.financial_type_id=4 AND p.original_installment_amount = c.total_amount A
 AND contribution_recur_id IS NULL AND c.campaign_id IS NOT NULL ORDER BY receive_date DESC
 LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
 
-
   while ($c->fetch()) {
     if ($c->frequency_unit == "quarter") {
-      echo "skipping quarterly pledge ";
-      print_r($c);
+      $logger->logMessage("Warning", "Skipping quarterly pledge ".$c->pledge_id
+          ." for contact ".$c->contact_id." with mandate ".$c->mandate);
       continue;
     }
-
-    print_debug($c);
-    if (in_array($c->pledge_id, $migrated))
+   if (in_array($c->pledge_id, $migrated)) {
       continue;//this contribution is part of a pledge that has already been migrated in this batch
+    }
+
+    $logger->logMessage("Info", "Processing pledge ".$c->pledge_id." for contact "
+        .$c->contact_id." with mandate ".$c->mandate);
+
     $migrated[] = $c->pledge_id;
 
     $cr = civicrm_api3("ContributionRecur", "create", array(
@@ -84,24 +57,27 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
         "campaign_id" => $c->campaign_id,
         "sequential" => 0
     ));
-    print_debug($cr);
+
+    $logger->logMessage("Info", "Created recurring contribution ".$cr['id']." for pledge ".
+        $c->pledge_id." and contact_id ".$c->contact_id);
 
     $verifyIBAN = CRM_Sepa_Logic_Verification::verifyIBAN($c->iban);
     if ($verifyIBAN) {
-      _logErrorRecord('IBAN is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, "IBAN :".$c->iban);
+      $logger->logError("IBAN is invalid, emptied mandate IBAN and BIC", $c->contact_id, $c->pledge_id,
+          $cr['id'], $c->campaign_id, "IBAN: ".$c->iban);
       $c->iban = "";
-      $reference = "INVIBAN ".$c->mandate.":".$cr["id"];
-    } else {
-      $reference = $c->mandate;
-    }
-
-    $verifyBIC = CRM_Sepa_Logic_Verification::verifyBIC($c->bic);
-    if ($verifyBIC) {
-      _logErrorRecord('BIC is invalid', $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, "BIC :".$c->bic);
       $c->bic = "";
-      $reference = "INVBIC ".$c->mandate.":".$cr["id"];
+      $reference = "INVIBAN".$c->mandate.": ".$cr["id"];
     } else {
-      $reference = $c->mandate;
+      $verifyBIC = CRM_Sepa_Logic_Verification::verifyBIC($c->bic);
+      if ($verifyBIC) {
+        $logger->logError("BIC is invalid, emptied mandate BIC", $c->contact_id, $c->pledge_id, $cr['id'],
+            $c->campaign_id, "BIC: ".$c->bic." with IBAN: ".$c->iban);
+        $c->bic = "";
+        $reference = "INVBIC".$c->mandate.": ".$cr["id"];
+      } else {
+        $reference = $c->mandate;
+      }
     }
 
     $mandate = array("contact_id" => $c->contact_id,
@@ -117,11 +93,11 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
         "sequential" => 0
     );
 
-    print_debug($mandate);
     try {
       $r = civicrm_api3("SepaMandate", "create", $mandate);
+      $logger->logMessage("Info", "Added mandate ".$reference." for contact ".$c->contact_id.
+          " recurring contribution ".$cr['id']." and pledge ".$c->pledge_id);
     } catch (Exception $e) {
-      echo "duplicate mandate {$c->mandate} for {$c->contact_id}\n";
 
       $mandate = array("contact_id" => $c->contact_id,
           "entity_table" => "civicrm_contribution_recur",
@@ -136,56 +112,19 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
       if (empty($c->iban)) {
         $mandate['reference'] = "DUP ".$reference;
       } else {
-        $mandate['reference'] = "DUP ".$reference.":".$cr["id"];
+        $mandate['reference'] = "DUP".$reference.": ".$cr["id"];
       }
+      $logger->logError("Creating duplicate mandate", $c->contact_id, $c->pledge_id,
+          $cr['id'], $c->campaign_id, "Original mandate is ".$c->mandate.", duplicate mandate is "
+          .$mandate['reference']);
       $r = civicrm_api3("SepaMandate", "create", $mandate);
     }
-    print_debug($r);
-    $t = CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution SET contribution_recur_id = %1 WHERE contact_id = %2 AND financial_type_id=4 AND total_amount = %3;", array(1 => array($cr["id"], 'Integer'), 2 => array($c->contact_id, 'Integer'), 3 => array($c->amount, 'Money')));
+    $t = CRM_Core_DAO::executeQuery("UPDATE civicrm_contribution SET contribution_recur_id = %1
+WHERE contact_id = %2 AND financial_type_id=4 AND total_amount = %3;",
+        array(1 => array($cr["id"], 'Integer'), 2 => array($c->contact_id, 'Integer'),
+            3 => array($c->amount, 'Money')));
 
-    echo "migrated pledge for {$c->contact_id}\n";
-
+    $logger->logMessage("Info", "migrated pledge for ".$c->contact_id);
   }
-}
-function _logErrorRecord($message, $contactId = null, $pledgeId = null, $recurId = null, $campaignId = null, $details = null) {
-  $whereClauses = array();
-  $whereClauses[] = 'error_message = %1';
-  $params[1] = array($message, 'String');
-  $whereClauses[] = 'migration_date = %2';
-  $params[2] = array(date('Ymd'), 'Date');
-  $count = 2;
-
-  if (!empty($contactId)) {
-    $count++;
-    $whereClauses[] = 'contact_id = %'.$count;
-    $params[$count] = array($contactId, 'Integer');
-  }
-
-  if (!empty($pledgeId)) {
-    $count++;
-    $whereClauses[] = 'pledge_id = %'.$count;
-    $params[$count] = array($pledgeId, 'Integer');
-  }
-
-  if (!empty($recurId)) {
-    $count++;
-    $whereClauses[] = 'recur_id = %'.$count;
-    $params[$count] = array($recurId, 'Integer');
-  }
-
-  if (!empty($campaignId)) {
-    $count++;
-    $whereClauses[] = 'campaign_id = %'.$count;
-    $params[$count] = array($campaignId, 'Integer');
-  }
-
-  if (!empty($details)) {
-    $count++;
-    $whereClauses[] = 'details = %'.$count;
-    $params[$count] = array($details, 'String');
-  }
-  $query = "INSERT INTO sepa_migrate_errors SET ".implode(', ', $whereClauses);
-
-  CRM_Core_DAO::executeQuery($query, $params);
 }
 

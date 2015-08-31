@@ -1,6 +1,8 @@
 ## migrate
 
-drush civicrm-api contribution.migrate option.limit=10000 debug=0
+drush civicrm-api contribution.migrate option.limit=10000
+
+There will be log file in the CiviCRM ConfigAndLog folder with the name aivl_migrate_log_(YmdhIs)
 
 ## cleanup
 

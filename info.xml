@@ -2,7 +2,7 @@
 <extension key="nl.amnesty.sepa" type="module">
   <file>sepamnesty</file>
   <name>Sepamnesty</name>
-  <description>Migrate pledges to recurring contribs</description>
+  <description>Migrate pledges to recurring contribs (specific to AIVL)</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Xavier Dutoit</author>
@@ -10,11 +10,11 @@
   </maintainer>
   <releaseDate>2014-09-15</releaseDate>
   <version>1.0</version>
-  <develStage>alpha</develStage>
+  <develStage>beta</develStage>
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>Probably of no use for you</comments>
+  <comments>Probably of no use for you, specific migration extension</comments>
   <civix>
     <namespace>CRM/Sepamesty</namespace>
   </civix>
