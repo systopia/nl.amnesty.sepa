@@ -10,7 +10,8 @@ class CRM_MigrateLogger {
   private $logFile = null;
   function __construct() {
     $config = CRM_Core_Config::singleton();
-    $fileName = $config->configAndLogDir."aivl_migrate_log_".date("YmdhIs");
+    $runDate = new DateTime('now');
+    $fileName = $config->configAndLogDir."aivl_migrate_log_".$runDate->format('YmdHis');
     $this->logFile = fopen($fileName, 'w');
     $this->createErrorTable();
   }
