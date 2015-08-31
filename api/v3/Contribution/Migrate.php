@@ -70,11 +70,22 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
       $reference = "INVIBAN".$c->mandate.": ".$cr["id"];
     } else {
       $verifyBIC = CRM_Sepa_Logic_Verification::verifyBIC($c->bic);
-      if ($verifyBIC) {
-        $logger->logError("BIC is invalid, emptied mandate BIC", $c->contact_id, $c->pledge_id, $cr['id'],
-            $c->campaign_id, "BIC: ".$c->bic." with IBAN: ".$c->iban);
-        $c->bic = "";
-        $reference = "INVBIC".$c->mandate.": ".$cr["id"];
+      if ($verifyBIC == "BIC is not correct") {
+        // try lookup with Iban
+        try {
+          $result = civicrm_api3('Bic', 'getfromiban', array('iban' => $c->iban));
+        } catch (CiviCRM_API3_Exception $ex) {
+          if (empty($result['bic'])) {
+            $logger->logError("BIC was invalid, replaced with look up of BIC", $c->contact_id, $c->pledge_id, $cr['id'],
+                $c->campaign_id, "BIC: " . $c->bic . " with IBAN: " . $c->iban);
+            $c->bic = $result['bic'];
+          } else {
+            $logger->logError("BIC is invalid, emptied mandate BIC", $c->contact_id, $c->pledge_id, $cr['id'],
+                $c->campaign_id, "BIC: " . $c->bic . " with IBAN: " . $c->iban);
+            $c->bic = "";
+            $reference = "INVBIC" . $c->mandate . ": " . $cr["id"];
+          }
+        }
       } else {
         $reference = $c->mandate;
       }
