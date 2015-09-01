@@ -91,6 +91,13 @@ LIMIT %1;", array(1 => array($params["option.limit"], 'Integer')));
       }
     }
 
+    // add check on length of reference
+    if (strlen($reference) > 35) {
+      $logger->logError("Mandate was more than 35 characters, will be truncated to 35",
+          $c->contact_id, $c->pledge_id, $cr['id'], $c->campaign_id, "Mandate was ".$reference
+          ." and will be ".substr($reference,0,35));
+      $reference = substr($reference,0,35);
+    }
     $mandate = array("contact_id" => $c->contact_id,
         "entity_table" => "civicrm_contribution_recur",
         "entity_id" => $cr["id"],
