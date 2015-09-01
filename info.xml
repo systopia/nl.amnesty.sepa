@@ -16,6 +16,6 @@
   </compatibility>
   <comments>Probably of no use for you, specific migration extension</comments>
   <civix>
-    <namespace>CRM/Sepamesty</namespace>
+    <namespace>CRM/Sepamnesty</namespace>
   </civix>
 </extension>
