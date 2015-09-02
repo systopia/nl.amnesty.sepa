@@ -8,7 +8,7 @@ require_once 'sepamnesty.civix.php';
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
  */
 function sepamnesty_civicrm_config(&$config) {
-  sepamnesty_civix_civicrm_config($config);
+  _sepamnesty_civix_civicrm_config($config);
 }
 
 /**
@@ -19,7 +19,7 @@ function sepamnesty_civicrm_config(&$config) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
  */
 function sepamnesty_civicrm_xmlMenu(&$files) {
-  sepamnesty_civix_civicrm_xmlMenu($files);
+  _sepamnesty_civix_civicrm_xmlMenu($files);
 }
 
 /**
@@ -28,7 +28,7 @@ function sepamnesty_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function sepamnesty_civicrm_install() {
-  return sepamnesty_civix_civicrm_install();
+  return _sepamnesty_civix_civicrm_install();
 }
 
 /**
@@ -37,7 +37,7 @@ function sepamnesty_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function sepamnesty_civicrm_uninstall() {
-  return sepamnesty_civix_civicrm_uninstall();
+  return _sepamnesty_civix_civicrm_uninstall();
 }
 
 /**

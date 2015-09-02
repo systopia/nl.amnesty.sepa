@@ -8,10 +8,10 @@
  */
 class CRM_MigrateLogger {
   private $logFile = null;
-  function __construct() {
+  function __construct($fileName = "aivl_migrate_log") {
     $config = CRM_Core_Config::singleton();
     $runDate = new DateTime('now');
-    $fileName = $config->configAndLogDir."aivl_migrate_log_".$runDate->format('YmdHis');
+    $fileName = $config->configAndLogDir.$fileName."_".$runDate->format('YmdHis');
     $this->logFile = fopen($fileName, 'w');
     $this->createErrorTable();
   }
@@ -77,7 +77,8 @@ class CRM_MigrateLogger {
     $setValues[] = 'error_message = %1';
     $setParams[1] = array($params['message'], 'String');
     $setValues[] = 'migration_date = %2';
-    $setParams[2] = array(date('Ymd'), 'Date');
+    $migrationDate = new DateTime('now');
+    $setParams[2] = array($migrationDate->format('Y-m-d H:i:s'), 'Date');
     $count = 2;
 
     if (!empty($params['contact_id'])) {
@@ -127,7 +128,7 @@ class CRM_MigrateLogger {
   `pledge_id` INT(11) DEFAULT NULL,
   `recur_id` INT(11) DEFAULT NULL,
   `campaign_id` INT(11) DEFAULT NULL,
-  `details` VARCHAR(45) DEFAULT NULL,
+  `details` VARCHAR(256) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
