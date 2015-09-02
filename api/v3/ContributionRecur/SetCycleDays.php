@@ -32,13 +32,12 @@ function civicrm_api3_contribution_recur_setcycledays($params) {
       $recurParams = array(
         1 => array("civicrm_contribution_recur", "String"),
         2 => array($cycleDay, "Integer"),
-        3 => array(5, "Integer"),
-        4 => array((string)$daoCycle->mandaat_code, "String"));
+        3 => array((string)$daoCycle->mandaat_code, "String"));
       $recurQuery = "UPDATE civicrm_contribution_recur recur
 JOIN civicrm_sdd_mandate sdd ON recur.id = sdd.entity_id AND sdd.entity_table = %1
 JOIN civicrm_value_sepa_direct_debit_2 custom ON sdd.reference = custom.mandate_3
 SET recur.cycle_day = %2
-WHERE recur.contribution_status_id = %3 AND sdd.reference = %4";
+WHERE sdd.reference = %3";
       try {
         CRM_Core_DAO::executeQuery($recurQuery, $recurParams);
         $logger->logMessage("INFO", "Set cycle days to ".$cycleDay." for recurring contribution with mandate "
