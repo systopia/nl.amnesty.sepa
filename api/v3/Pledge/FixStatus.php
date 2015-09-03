@@ -21,24 +21,26 @@ function civicrm_api3_pledge_fixstatus($params) {
   $espadonParams = array(1 => array("Lopend", "String"));
   $daoEspadon = CRM_Core_DAO::executeQuery($espadonQuery, $espadonParams);
   while ($daoEspadon->fetch()) {
-    /*
-     * now get latest pledge for mandate and update status if not In Progress
-     */
-    $pledgeQuery = "SELECT p.contact_id, p.id, p.status_id FROM civicrm_value_sepa_direct_debit_2 JOIN civicrm_pledge p on entity_id = p.id
-      WHERE mandate_3 = %1 ORDER BY start_date DESC";
-    $pledgeParams = array(1 => array($daoEspadon->mandatestring, "String"));
-    $daoPledge = CRM_Core_DAO::executeQuery($pledgeQuery, $pledgeParams);
-    if ($daoPledge->fetch()) {
-      if ($daoPledge->status_id != 5) {
-        $updateQuery = "UPDATE civicrm_pledge SET status_id = %1 WHERE id = %2";
-        $updateParams = array(
-          1 => array(5, "Integer"),
-          2 => array($daoPledge->id, "Integer")
-        );
-        CRM_Core_DAO::executeQuery($updateQuery, $updateParams);
-        $countUpdated++;
-        $logger->logMessage("INFO", "Pledge ".$daoPledge->id." with mandate ".$daoEspadon->mandatestring." set to status In Progress (contact "
-            .$daoPledge->contact_id.")");
+    if (!empty($daoEspadon->mandatestring)) {
+      /*
+       * now get latest pledge for mandate and update status if not In Progress
+       */
+      $pledgeQuery = "SELECT p.contact_id, p.id, p.status_id FROM civicrm_value_sepa_direct_debit_2 JOIN civicrm_pledge p ON entity_id = p.id
+        WHERE mandate_3 = %1 ORDER BY start_date DESC";
+      $pledgeParams = array(1 => array($daoEspadon->mandatestring, "String"));
+      $daoPledge = CRM_Core_DAO::executeQuery($pledgeQuery, $pledgeParams);
+      if ($daoPledge->fetch()) {
+        if ($daoPledge->status_id != 5) {
+          $updateQuery = "UPDATE civicrm_pledge SET status_id = %1 WHERE id = %2";
+          $updateParams = array(
+              1 => array(5, "Integer"),
+              2 => array($daoPledge->id, "Integer")
+          );
+          CRM_Core_DAO::executeQuery($updateQuery, $updateParams);
+          $countUpdated++;
+          $logger->logMessage("INFO", "Pledge " . $daoPledge->id . " with mandate " . $daoEspadon->mandatestring . " set to status In Progress (contact "
+              . $daoPledge->contact_id . ")");
+        }
       }
     }
   }
