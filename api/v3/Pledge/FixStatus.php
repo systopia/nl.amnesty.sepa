@@ -14,19 +14,34 @@
  * @throws API_Exception
  */
 function civicrm_api3_pledge_fixstatus($params) {
-  if (array_key_exists('magicword', $params) && $params['magicword'] == 'sesame') {
-    $returnValues = array( // OK, return several data rows
-      12 => array('id' => 12, 'name' => 'Twelve'),
-      34 => array('id' => 34, 'name' => 'Thirty four'),
-      56 => array('id' => 56, 'name' => 'Fifty six'),
-    );
-    // ALTERNATIVE: $returnValues = array(); // OK, success
-    // ALTERNATIVE: $returnValues = array("Some value"); // OK, return a single value
+  $countUpdated = 0;
+  $logger = new CRM_MigrateLogger("pledge_status_update_log");
 
-    // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
-    return civicrm_api3_create_success($returnValues, $params, 'NewEntity', 'NewAction');
-  } else {
-    throw new API_Exception(/*errorMessage*/ 'Everyone knows that the magicword is "sesame"', /*errorCode*/ 1234);
+  $espadonQuery = "SELECT mandatestring FROM tmp_espadon3 WHERE Statuut_detail = %1";
+  $espadonParams = array(1 => array("Lopend", "String"));
+  $daoEspadon = CRM_Core_DAO::executeQuery($espadonQuery, $espadonParams);
+  while ($daoEspadon->fetch()) {
+    /*
+     * now get latest pledge for mandate and update status if not In Progress
+     */
+    $pledgeQuery = "SELECT p.contact_id, p.id, p.status_id FROM civicrm_value_sepa_direct_debit_2 JOIN civicrm_pledge p on entity_id = p.id
+      WHERE mandate_3 = %1 ORDER BY start_date DESC";
+    $pledgeParams = array(1 => array($daoEspadon->mandatestring, "String"));
+    $daoPledge = CRM_Core_DAO::executeQuery($pledgeQuery, $pledgeParams);
+    if ($daoPledge->fetch()) {
+      if ($daoPledge->status_id != 5) {
+        $updateQuery = "UPDATE civicrm_pledge SET status_id = %1 WHERE id = %2";
+        $updateParams = array(
+          1 => array(5, "Integer"),
+          2 => array($daoPledge->id, "Integer")
+        );
+        CRM_Core_DAO::executeQuery($updateQuery, $updateParams);
+        $countUpdated++;
+        $logger->logMessage("INFO", "Pledge ".$daoPledge->id." with mandate ".$daoEspadon->mandatestring." set to status In Progress (contact "
+            .$daoPledge->contact_id.")");
+      }
+    }
   }
+  $returnValues = "Pledges updated to In Progress: ".$countUpdated;
+  return civicrm_api3_create_success($returnValues, $params, 'Pledge', 'FixStatus');
 }
-

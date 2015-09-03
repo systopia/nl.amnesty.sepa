@@ -41,9 +41,9 @@ WHERE sdd.reference = %3";
       try {
         CRM_Core_DAO::executeQuery($recurQuery, $recurParams);
         $logger->logMessage("INFO", "Set cycle days to ".$cycleDay." for recurring contribution with mandate "
-            .$daoCycle->mandate_code);
+            .$daoCycle->mandaat_code);
       } catch (CiviCRM_API3_Exception $ex) {
-        $logger->logMessage("WARNING", "Could not update recurring contribution for mandate ".$daoCycle->mandate_code);
+        $logger->logMessage("WARNING", "Could not update recurring contribution for mandate ".$daoCycle->mandaat_code);
       }
     }
   }
@@ -111,15 +111,15 @@ function _validCheck($dao, $logger) {
   }
 
   try {
-    $countMandate = civicrm_api3('Sepamandate', 'Getcount', array('reference' => $dao->mandaat_code));
+    $countMandate = civicrm_api3('SepaMandate', 'Getcount', array('reference' => $dao->mandaat_code));
     if ($countMandate == 0) {
       $logger->logMessage("WARNING", "Could not find any sdd mandate with reference ".$dao->mandaat_code
           .", no cycle day set for mandate.");
       return FALSE;
     }
   } catch (CiviCRM_API3_Exception $ex) {
-    $logger->logMessage("WARNING", "Error from API when trying to do a Sepamandate Getcount for reference "
-        . $dao->mandaat_code);
+    $logger->logMessage("WARNING", "Error from API when trying to do a SepaMandate Getcount for reference "
+        . $dao->mandaat_code.", error message: ".$ex->getMessage());
     return FALSE;
   }
 
