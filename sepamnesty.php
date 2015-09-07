@@ -46,7 +46,7 @@ function sepamnesty_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function sepamnesty_civicrm_enable() {
-  return sepamnesty_civix_civicrm_enable();
+  return _sepamnesty_civix_civicrm_enable();
 }
 
 /**
@@ -55,7 +55,7 @@ function sepamnesty_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
 function sepamnesty_civicrm_disable() {
-  return sepamnesty_civix_civicrm_disable();
+  return _sepamnesty_civix_civicrm_disable();
 }
 
 /**
@@ -70,7 +70,7 @@ function sepamnesty_civicrm_disable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function sepamnesty_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return sepamnesty_civix_civicrm_upgrade($op, $queue);
+  return _sepamnesty_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -82,7 +82,7 @@ function sepamnesty_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function sepamnesty_civicrm_managed(&$entities) {
-  return sepamnesty_civix_civicrm_managed($entities);
+  return _sepamnesty_civix_civicrm_managed($entities);
 }
 
 /**
@@ -95,7 +95,7 @@ function sepamnesty_civicrm_managed(&$entities) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
  */
 function sepamnesty_civicrm_caseTypes(&$caseTypes) {
-  sepamnesty_civix_civicrm_caseTypes($caseTypes);
+  _sepamnesty_civix_civicrm_caseTypes($caseTypes);
 }
 
 /**
@@ -104,5 +104,5 @@ function sepamnesty_civicrm_caseTypes(&$caseTypes) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
  */
 function sepamnesty_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  sepamnesty_civix_civicrm_alterSettingsFolders($metaDataFolders);
+  _sepamnesty_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
