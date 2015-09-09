@@ -17,7 +17,7 @@ function civicrm_api3_contribution_migrate($params) {
     iban_pledge_5 AS iban,bic_pledge_6 AS bic
     FROM civicrm_contribution AS c
     LEFT JOIN civicrm_pledge AS p ON p.campaign_id=c.campaign_id AND  p.contact_id = c.contact_id
-    LEFT JOIN cviicrm_campaign ON civicrm_campaign.id=c.campaign_id
+    LEFT JOIN civicrm_campaign ON civicrm_campaign.id=c.campaign_id
     LEFT JOIN civicrm_value_sepa_direct_debit_2 AS m ON m.entity_id=p.id
     WHERE c.financial_type_id=4 AND p.original_installment_amount = c.total_amount AND c.total_amount > 0
       AND contribution_recur_id IS NULL AND c.campaign_id IS NOT NULL ORDER BY receive_date DESC
