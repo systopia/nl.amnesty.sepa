@@ -76,10 +76,7 @@ class CRM_MigrateLogger {
     $setValues = array();
     $setValues[] = 'error_message = %1';
     $setParams[1] = array($params['message'], 'String');
-    $setValues[] = 'migration_date = %2';
-    $migrationDate = new DateTime('now');
-    $setParams[2] = array($migrationDate->format('Y-m-d H:i:s'), 'Date');
-    $count = 2;
+    $count = 1;
 
     if (!empty($params['contact_id'])) {
       $count++;
@@ -122,7 +119,7 @@ class CRM_MigrateLogger {
   private function createErrorTable() {
     $errorFile = "CREATE TABLE IF NOT EXISTS `sepa_migrate_errors` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `migration_date` DATE DEFAULT NULL,
+  `migration_date` TIMESTAMP,
   `error_message` TEXT,
   `contact_id` INT(11) DEFAULT NULL,
   `pledge_id` INT(11) DEFAULT NULL,
