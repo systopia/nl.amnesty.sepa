@@ -39,6 +39,7 @@ function civicrm_api3_espadon_migrate($params)
     } else {
       $daoEspadon->campaignId = _getCampaignIdWithBron($daoEspadon->Bron, $logger, $warnings);
       $daoEspadon->Mandate = _correctMandate($daoEspadon->Mandate);
+      $daoEspadon->Iban = _correctIban($daoEspadon->Iban);
       $daoEspadon->contactId = _getContactIdWithExternalId($daoEspadon->ExterneId, $logger, $warnings);
       if (!empty($daoEspadon->contactId)) {
         _processEspadonRecord($daoEspadon, $logger, $warnings, $errors);
@@ -340,6 +341,7 @@ function _convertFrequency($sourceFrequency) {
     break;
   }
 }
+
 /**
  * Function to remove spaces from mandate
  * and pad left with 0 if only numbers
@@ -364,6 +366,27 @@ function _correctMandate($mandate) {
     $correctedMandate = str_pad($correctedMandate, 5, "0", STR_PAD_LEFT);
   }
   return (string) $correctedMandate;
+}
+
+/**
+ * Function to remove spaces from iban
+ *
+ * @param $mandate
+ * @return string
+ */
+function _correctIban($iban) {
+  $correctedIban = array();
+  if (!empty($iban)) {
+    $done = 0;
+    while ($done < strlen($iban)) {
+      $digit = substr($iban, $done, 1);
+      if (!empty($digit) && $digit != " ") {
+        $correctedIban[$done] = $digit;
+      }
+      $done++;
+    }
+  }
+  return (string) implode("", $correctedIban);
 }
 
 /**
