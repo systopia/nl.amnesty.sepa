@@ -355,7 +355,7 @@ function _correctMandate($mandate) {
     $done = 0;
     while ($done < strlen($mandate)) {
       $digit = substr($mandate, $done, 1);
-      if (!empty($digit) && $digit != " ") {
+      if ($digit != " ") {
         $correctedMandate[$done] = $digit;
       }
       $done++;
@@ -380,7 +380,7 @@ function _correctIban($iban) {
     $done = 0;
     while ($done < strlen($iban)) {
       $digit = substr($iban, $done, 1);
-      if (!empty($digit) && $digit != " ") {
+      if ($digit != " ") {
         $correctedIban[$done] = $digit;
       }
       $done++;
