@@ -46,7 +46,7 @@ class CRM_MigrateLogger {
    */
   public function logError($message, $contactId = null, $pledgeId = null, $recurId = null, $campaignId = null, $details = "") {
     if (!empty($message)) {
-      $this->logMessage('Error', $message);
+      $this->logMessage('Error', $message.", ".$details);
     }
     $errorParams = array();
     $errorParams['message'] = $message;
