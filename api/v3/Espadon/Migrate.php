@@ -53,7 +53,7 @@ function civicrm_api3_espadon_migrate($params)
     }
   }
   $returnValues = array("Migratie klaar, " . $processed . " records uit Espadon verwerkt met " . $errors
-      . " fouten, " . $warnings . " waarschuwingen en " . $migrated . " recrods gemigreerd");
+      . " fouten, " . $warnings . " waarschuwingen en " . $migrated . " records gemigreerd");
   return civicrm_api3_create_success($returnValues, $params, 'Espadon', 'Migrate');
 }
 
