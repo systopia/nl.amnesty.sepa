@@ -31,7 +31,7 @@ function civicrm_api3_espadon_migrate($params)
   );
   $daoEspadon = CRM_Core_DAO::executeQuery($queryEspadon, $paramsEspadon);
   while ($daoEspadon->fetch()) {
- civi    _setEspadonProcessed($daoEspadon->espadon_id);
+    _setEspadonProcessed($daoEspadon->espadon_id);
     $processed++;
     if (empty($daoEspadon->DatumeersteBetaling) && empty($datumLaatsteBetaling)) {
       $logger->logMessage("Info", "Espadon mandaat ".$daoEspadon->Mandate
