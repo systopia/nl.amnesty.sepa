@@ -20,8 +20,10 @@ function civicrm_api3_pledge_fixstatus($params) {
   );
   $daoSDD = CRM_Core_DAO::executeQuery($querySDD, $paramsSDD);
   while ($daoSDD->fetch()) {
-    $queryPledge = "UPDATE civicrm_pledge SET status_id = 1 WHERE contact_id = %1";
-    $paramsPledge = array(1 => array($daoSDD->contact_id, "Integer"));
+    $queryPledge = "UPDATE civicrm_pledge SET status_id = %1 WHERE contact_id = %2";
+    $paramsPledge = array(
+      1 => array(1, "Integer"),
+      2 => array($daoSDD->contact_id, "Integer"));
     CRM_Core_DAO::executeQuery($queryPledge, $paramsPledge);
   }
   $returnValues = array();
