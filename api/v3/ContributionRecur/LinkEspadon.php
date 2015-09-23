@@ -42,8 +42,10 @@ function civicrm_api3_contribution_recur_linkespadon($params) {
         2 => array($daoSDD->contact_id, "Integer"),
         3 => array(4, "Integer"),
         4 => array($daoSDD->campaign_id, "Integer"),
-        5 => array(date("Ymd", strtotime($daoSDD->start_date)), "Date")
+        5 => array(0, "Integer"),
+        6 => array(date("Ymd", strtotime($daoSDD->start_date)), "Date")
       );
+      CRM_Core_DAO::executeQuery($contribQuery, $contribParams);
     } else {
       $logger->logMessage("Waarschuwing", "Contact ".$daoSDD->contact_id
         ." heeft meer dan 1 recurring contribution met dezelfde campaign, niet verwerkt!");
