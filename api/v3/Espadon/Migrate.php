@@ -312,8 +312,8 @@ function _convertCycleDay($laatsteDatum, $eersteDatum) {
   } else {
     $testDatum = $eersteDatum;
   }
-  $datumParts = explode("/", $testDatum);
-  if ($datumParts[0] < 16) {
+  $testDag = (int) substr($testDatum, -2);
+  if ($testDag < 16) {
     return 7;
   } else {
     return 21;
@@ -409,6 +409,8 @@ function _setEspadonProcessed($espadonId) {
 function _correctDate($sourceDate) {
   $sourceDate = (string) $sourceDate;
   $dateParts = explode("/", $sourceDate);
+  $dateParts[0] = str_pad($dateParts[0], 2, "0", STR_PAD_LEFT);
+  $dateParts[1] = str_pad($dateParts[1], 2, "0", STR_PAD_LEFT);
   $cleanDate = $dateParts[2].$dateParts[1].$dateParts[0];
   $outDate = new DateTime($cleanDate);
   return $outDate->format("Ymd");
