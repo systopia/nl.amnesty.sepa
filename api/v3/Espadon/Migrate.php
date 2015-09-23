@@ -225,7 +225,6 @@ function _processEspadonRecord($daoEspadon, $logger, &$warnings, &$errors) {
  *
  * @param $params
  * @param $logger
- * @param $warnings
  * @param $errors
  * @return array
  */
@@ -246,7 +245,6 @@ function _createRecurringContribution($params, $logger, &$errors) {
  *
  * @param $params
  * @param $logger
- * @param $warnings
  * @param $errors
  * @return array
  */
