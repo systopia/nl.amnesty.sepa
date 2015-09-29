@@ -173,13 +173,14 @@ function _processEspadonRecord($daoEspadon, $logger, &$warnings, &$errors) {
    */
   if (_validateIban($daoEspadon, $logger, $errors) == TRUE) {
     $bic = _lookupBic($daoEspadon->Iban, $logger, $warnings);
+    $frequency = _convertFrequency($daoEspadon->Frequentie);
     $recurringParams = array(
       'contact_id' => $daoEspadon->contactId,
       'amount' => $daoEspadon->Bedrag,
       'currency' => "EUR",
       'contribution_status_id' => 5,
-      'frequency_interval' => 1,
-      'frequency_unit' => _convertFrequency($daoEspadon->Frequentie),
+      'frequency_interval' => $frequency['interval'],
+      'frequency_unit' => $frequency['unit'],
       'cycle_day' => _convertCycleDay($lastDate, $firstDate),
       'financial_type_id' => 4,
       'payment_instrument_id' => (int)CRM_Core_OptionGroup::getValue("payment_instrument", "RCUR", "name"),
@@ -327,15 +328,22 @@ function _convertCycleDay($laatsteDatum, $eersteDatum) {
  * @return string
  */
 function _convertFrequency($sourceFrequency) {
+  $frequency = array();
   switch ($sourceFrequency) {
     case "Annuel":
-      return "year";
+      $frequency['unit'] = "month";
+      $frequency['interval'] = 12;
+      return $frequency;
     break;
     case "Trimestriel":
-      return "quarter";
+      $frequency['unit'] = "month";
+      $frequency['interval'] = 3;
+      return $frequency;
     break;
     default:
-      return "month";
+      $frequency['unit'] = "month";
+      $frequency['interval'] = 1;
+      return $frequency;
     break;
   }
 }
