@@ -291,8 +291,12 @@ function _validateIban($daoEspadon, $logger, &$errors) {
  */
 function _lookupBic($iban, $logger, &$warnings) {
   try {
-    $bic = civicrm_api3("Bic", "Getfromiban", array('iban' => $iban));
-    return $bic;
+    $bic = civicrm_api3("Bic", "getfromiban", array('iban' => $iban));
+    if ($bic['bic']) {
+      return $bic['bic'];
+    } else {
+      return "";
+    }
   } catch (CiviCRM_API3_Exception $ex) {
     $warnings++;
     $logger->logMessage("Waarschuwing", "Geen BIC gevonden voor Iban ".$iban.", mandaat aangemaakt met lege BIC");
