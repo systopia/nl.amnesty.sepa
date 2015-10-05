@@ -35,6 +35,7 @@ function civicrm_api3_contribution_recur_fixamount($params) {
   }
   return civicrm_api3_create_success($returnValues, $params, 'ContributionRecur', 'FixAmount');
 }
+
 /**
  * Function to check if amount needs to be changed
  *

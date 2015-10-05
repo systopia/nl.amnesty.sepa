@@ -176,7 +176,7 @@ function _processEspadonRecord($daoEspadon, $logger, &$warnings, &$errors) {
     $frequency = _convertFrequency($daoEspadon->Frequentie);
     $recurringParams = array(
       'contact_id' => $daoEspadon->contactId,
-      'amount' => $daoEspadon->Bedrag,
+      'amount' => _convertAmount($daoEspadon->Bedrag),
       'currency' => "EUR",
       'contribution_status_id' => 5,
       'frequency_interval' => $frequency['interval'],
@@ -427,3 +427,23 @@ function _correctDate($sourceDate) {
   $outDate = new DateTime($cleanDate);
   return $outDate->format("Ymd");
 }
+
+/**
+ * Function to convert amount from , to .
+ *
+ * @param string $sourceAmount
+ * @return string|bool
+ */
+function _convertAmount($sourceAmount) {
+  $newAmount = FALSE;
+  if (!empty($sourceAmount)) {
+    $amountParts = explode(",", $sourceAmount);
+    if (isset($amountParts[1])) {
+      $newAmount = implode(".", $amountParts);
+    } else {
+      $newAmount = $sourceAmount;
+    }
+  }
+  return $newAmount;
+}
+
