@@ -419,8 +419,8 @@ function _setEspadonProcessed($espadonId) {
  * @return string
  */
 function _correctDate($sourceDate) {
-  $sourceDate = (string) $sourceDate;
-  $dateParts = explode("/", $sourceDate);
+  $sourceDate = (string) trim($sourceDate);
+  $dateParts = explode("-", $sourceDate);
   $dateParts[0] = str_pad($dateParts[0], 2, "0", STR_PAD_LEFT);
   $dateParts[1] = str_pad($dateParts[1], 2, "0", STR_PAD_LEFT);
   $cleanDate = $dateParts[2].$dateParts[1].$dateParts[0];
